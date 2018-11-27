@@ -518,7 +518,7 @@ class Element(metaclass=ElementParameterMetaClass):
         self._name = str(name)
         self.raw_spice = ''
         self.enabled = True
-        #self._pins = kwargs.pop('pins',())
+        self._pins = kwargs.pop('pins',())
 
         # Process remaining args
         if len(self.__parameters_from_args__) < len(args):
@@ -701,13 +701,11 @@ class FixedPinElement(Element):
                     raise NameError("Node '{}' is missing for element {}".format(pin_definition.name, self.name))
                 pin_definition_nodes.append((pin_definition, node))
 
-        
-
-        self._pins = [Pin(self, pin_definition, netlist.get_node(node, True))
+        pins = [Pin(self, pin_definition, netlist.get_node(node, True))
                       for pin_definition, node in pin_definition_nodes]
         
-        
-        super().__init__(netlist, name, *args, **kwargs)    
+        super().__init__(netlist, name, *args, pins=pins, **kwargs)    
+    
 
     ##############################################
 
@@ -726,8 +724,11 @@ class NPinElement(Element):
     ##############################################
 
     def __init__(self, netlist, name, nodes, *args, **kwargs):
-
-        super().__init__(netlist, name, *args, **kwargs)
+        
+        pins = [Pin(self, PinDefinition(position), netlist.get_node(node, True))
+                      for position, node in enumerate(nodes)]
+        
+        super().__init__(netlist, name, *args, pins=pins, **kwargs)
 
     ##############################################
 

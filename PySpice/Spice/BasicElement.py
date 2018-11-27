@@ -169,11 +169,11 @@ class SubCircuitElement(NPinElement):
         #     self.optional_parameters[key] = parameter
         #     setattr(self, key, parameter)
         
-        subcircuit = netlist._subcircuits.get(subcircuit_name)
-        
-        self._pins = [Pin(self, PinDefinition(position, name=subcircuit.__pins__[position]), netlist.get_node(node, True))
-                      for position, node in enumerate(nodes)]
-        
+        #subcircuit = netlist._subcircuits.get(subcircuit_name)
+        #if subcircuit:
+        #    pins = [Pin(self, PinDefinition(position, name=subcircuit.__pins__[position]), netlist.get_node(node, True))
+        #              for position, node in enumerate(nodes)]
+
         super().__init__(netlist, name, nodes, subcircuit_name, 
                          schematic_kwargs=schematic_kwargs)
 
@@ -1074,6 +1074,25 @@ class Diode(FixedPinElement):
     .. code-block:: none
 
         DXXXXXXX n+ n- mname <area=val> <m=val> <pj=val> <off> <ic=vd> <temp=val> <dtemp=val>
+        
+        area: Area of the diode. It modifies saturation currents, capacitances, and resistances.
+        Area factor for LEVEL=1 model is not affected by the option SCALE. Default=1.0.
+        Affects IK, IKR, JS, CJO, and R
+        
+        m: Multiplier factor to simulate multiple diodes. All currents, capacitances, 
+        and resistances are affected by M=val. Default=1.
+        
+        pj: Periphery of junction. Overrides PJ in model. Calculated from W, L if specified.
+        Affects JSW and CJP model parameters. Default=0.0.
+        
+        off: Switch that sets initial condition to OFF for the element in DC analysis.
+        Default=ON.
+        
+        ic: Initial voltage across the diode element. Interacts with the UIC option
+        in the .TRAN statement and is overridden by the .IC statement
+        
+        dtemp: The difference between element temperature and the circuit temperature.
+        Default=0.0.
 
     Keyword Parameters:
 
@@ -1118,16 +1137,16 @@ class Diode(FixedPinElement):
 
     __alias__ = 'D'
     __prefix__ = 'D'
-    __pins__ = (('cathode', 'plus'), ('anode', 'minus'))
+    __pins__ = (('anode', 'plus'), ('cathode', 'minus'))
 
     model = ModelPositionalParameter(position=0, key_parameter=True)
     area = FloatKeyParameter('area')
-    multiplier = IntKeyParameter('m')
-    pj = FloatKeyParameter('pj')
-    off = FlagParameter('off')
+    multiplier = IntKeyParameter('m', default=1.0)
+    pj = FloatKeyParameter('pj', default=0.0)
+    off = FlagParameter('off', default=False)
     ic = FloatPairKeyParameter('ic')
     temperature = FloatKeyParameter('temp', unit=U_Degree)
-    device_temperature = FloatKeyParameter('dtemp', unit=U_Degree)
+    device_temperature = FloatKeyParameter('dtemp', unit=U_Degree, default=0.0)
 
 ####################################################################################################
 #
