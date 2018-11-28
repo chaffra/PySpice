@@ -76,9 +76,10 @@ class NgSpiceSubprocessCircuitSimulator(NgSpiceCircuitSimulator):
         raw_file = self._spice_server(spice_input=str(self))
         self.reset_analysis()
         raw_file.simulation = self
-
-        # for field in raw_file.variables:
-        #     print field
+        
+        self.raw_file = raw_file
+        #for field in raw_file.variables:
+        #     print(field)
 
         return raw_file.to_analysis()
 
